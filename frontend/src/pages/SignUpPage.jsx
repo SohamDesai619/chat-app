@@ -22,7 +22,7 @@ const SignUpPage = () => {
     if(!formData.email.trim()) return toast.error("Email is required");
     if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
     if(!formData.password.trim()) return toast.error("Password is required");
-    if(!formData.password.length<6) return toast.error("Password must be atleast 6 characters")
+    if(!formData.password.length>6) return toast.error("Password must be atleast 6 characters")
 
     return true;
   }
@@ -45,13 +45,13 @@ const SignUpPage = () => {
                 <MessageSquare className="size-6 text-primary"/>
               </div>
               <h1 className='text-2xl font-bold mt-2'>Create Account</h1>
-              <p className='text-base-content/60'>Get Started with your free account</p>
+              <p className='text-base-content/60 text-white'>Get Started with your free account</p>
             </div>
           </div>
           <form onSubmit={handleSubmit} className='space-y-6'>
             <div className='form-control'>
               <label className='label'>
-                <span className='label-text font-medium'>Full Name</span>
+                <span className='label-text font-medium text-white'>Full Name</span>
               </label>
               <div className='relative'>
                 <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
@@ -66,7 +66,7 @@ const SignUpPage = () => {
             </div>
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Email</span>
+                <span className="label-text font-medium text-white">Email</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -83,7 +83,7 @@ const SignUpPage = () => {
             </div>
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Password</span>
+                <span className="label-text font-medium text-white">Password</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
