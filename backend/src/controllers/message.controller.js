@@ -1,39 +1,46 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import mongoose from "mongoose";
+import cloudinary from "../lib/cloudinary.js";
+import { io,getReceiverSocketId } from "../lib/socket.js";
 
-export const getUsersforSidebar = async (req,res) =>{
+export const getUsersSidebar = async (req,res) =>{
     try{
         const loggedInUserId = req.user._id;
-        const filteredUsers = await User.find({_id:{$ne:loggedInUserId}}).select(-password)
+        const filteredUsers = await User.find({_id:{$ne:loggedInUserId}}).select("-password")
 
         res.status(200).json(filteredUsers)
     }
     catch(error){
-        console.log("Error in getUsersforSidebar:",error.message);
+        console.log("Error in getUsersSidebar:",error.message);
     }
 }
 
-export const getMessages = async (req,res)=>{
-    try{
-        
-        const {id:userToChatId}=req.params;
+export const getMessages = async (req, res) => {
+    try {
+        const { id: userToChatId } = req.params;
 
         const myId = req.user._id;
 
+        // Ensure both IDs are valid ObjectIds
+        if (!mongoose.Types.ObjectId.isValid(myId) || !mongoose.Types.ObjectId.isValid(userToChatId)) {
+            return res.status(400).json({ error: "Invalid userId format" });
+        }
+
         const messages = await Message.find({
-            $or:[
-                {senderId:myId,receiverId:userToChatId},
-                {senderId:userToChatId,receiverId:myId}
+            $or: [
+                { senderId: myId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: myId }
             ]
-        })
-        res.status(200).json(messages)
+        }).exec();
+
+        res.status(200).json(messages);
+    } catch (error) {
+        console.log("Error in getMessages controller:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+        
     }
-    catch(error){
-       console.log("Error in getMessages controller:",error.message);
-       res.status(500).json({error:"Internal Server Error"});
-       
-    }
-}
+};
 
 export const sendMessage = async(req,res) =>{
     try {
@@ -55,6 +62,11 @@ export const sendMessage = async(req,res) =>{
         });
 
         await newMessage.save();
+
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage",newMessage)
+        }
 
         res.status(201).json(newMessage)
     } catch (error) {
